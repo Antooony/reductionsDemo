@@ -1,63 +1,82 @@
-import React from "react";
-import { Group } from "@vx/group";
-import { scaleTime, scaleLinear } from "@vx/scale";
-import { LinePath } from "@vx/shape";
-import { AxisLeft, AxisBottom } from "@vx/axis";
-import { GradientOrangeRed } from "@vx/gradient";
-import { extent, max } from "d3-array";
+import React from 'react'
+import { Group } from '@vx/group'
+import { scaleTime, scaleLinear } from '@vx/scale'
+import { LinePath } from '@vx/shape'
+import { AxisLeft, AxisBottom } from '@vx/axis'
+import { GradientOrangeRed } from '@vx/gradient'
+import { extent, max } from 'd3-array'
 
-import getData from "./data";
+import getData from './data'
 
-const width = 450;
-const height = 200;
+const width = 450
+const height = 200
 
 // Bounds
 const margin = {
   top: 20,
   bottom: 25,
   left: 70,
-  right: 70
-};
-const xMax = width - margin.left - margin.right;
-const yMax = height - margin.top - margin.bottom;
+  right: 70,
+}
+const xMax = width - margin.left - margin.right
+const yMax = height - margin.top - margin.bottom
 
 class Graph extends React.Component {
   static defaultProps = {
+    domain: {},
     x: d => new Date(d.x),
-    y: d => d.y
-  };
+    y: d => d.y,
+  }
 
   state = {
-    data: []
-  };
-
-  // https://reactjs.org/docs/state-and-lifecycle.html
-  async componentDidMount() {
-    const data = await getData({
-      start: this.props.time.getTime() - 40000,
-      stop: this.props.time.getTime(),
-      reduceseconds: this.props.reduceseconds,
-      reduce: this.props.reduce
-    });
-
-    this.setState({
-      data
-    });
+    data: [],
   }
+
+  componentDidMount() {
+    this.getData()
+  }
+
+  componentDidUpdate(prevProps) {
+    const { origin, metric } = this.props
+
+    if (prevProps.origin !== origin || prevProps.metric !== metric) {
+      this.getData()
+    }
+  }
+
+  async getData() {
+    const { reduce, reduceseconds, time, origin, metric } = this.props
+
+    try {
+      const data = await getData({
+        metric,
+        origin,
+        reduce,
+        reduceseconds,
+        start: time.getTime() - 40000,
+        stop: time.getTime(),
+      })
+      this.setState({
+        data,
+      })
+    } catch (e) {
+      console.log(e.type, e.message)
+    }
+  }
+
   render() {
-    const { x, y } = this.props;
-    const { data } = this.state;
+    const { title, x, y, domain } = this.props
+    const { data } = this.state
 
     const xScale = scaleTime({
       range: [0, xMax],
-      domain: extent(data, x)
-    });
+      domain: extent(data, x),
+    })
     const yScale = scaleLinear({
       range: [yMax, 0],
-      domain: [0, max(data, y)]
-    });
+      domain: domain.y || [0, max(data, y)],
+    })
 
-    const title = this.props.title;
     return (
       <div className="Graph">
         <svg width={width} height={height}>
@@ -66,22 +85,22 @@ class Graph extends React.Component {
           <Group top={margin.top} left={margin.left}>
             <LinePath
               data={data}
-              xScale={xScale}
-              yScale={yScale}
-              x={x}
-              y={y}
               stroke="url(#gradient)"
               strokeWidth={3}
+              x={x}
+              xScale={xScale}
+              y={y}
+              yScale={yScale}
             />
 
             <AxisLeft scale={yScale} top={0} left={0} label={title} />
 
-            <AxisBottom scale={xScale} top={yMax} />
+            <AxisBottom numTicks={0} scale={xScale} top={yMax} />
           </Group>
         </svg>
       </div>
-    );
+    )
   }
 }
 
-export default Graph;
+export default Graph
