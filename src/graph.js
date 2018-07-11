@@ -40,25 +40,28 @@ class Graph extends React.Component {
     const { origin, metric } = this.props
 
     if (prevProps.origin !== origin || prevProps.metric !== metric) {
-      this.getData()
+      this.getData(true)
     }
   }
 
-  async getData() {
+  async getData(forceUpdate = false) {
     const { reduce, reduceseconds, time, origin, metric } = this.props
 
     try {
+      const t = forceUpdate ? new Date().getTime() : time.getTime()
+
       const data = await getData({
         metric,
         origin,
         reduce,
         reduceseconds,
-        start: time.getTime() - 40000,
-        stop: time.getTime(),
+        start: t - 40000,
+        stop: t,
       })
       this.setState({
         data,
       })
+      setTimeout(() => this.getData(true), 2e3)
     } catch (e) {
       console.log(e.type, e.message)
     }
