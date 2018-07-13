@@ -2,9 +2,18 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 import Graph from './graph'
+import GraphFull from './allInOne'
+import getHostList from './api/HostList'
+import getMetricsList from './api/MetricList'
 
 import './index.css'
 
+const CHART_FULL = [
+  {
+    title: 'AllInOne',
+    reduce: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+  },
+]
 const CHARTS = [
   [
     {
@@ -75,8 +84,50 @@ const ChartContainer = ({ origin, metric, charts }) => {
   )
 }
 
+const ChartContainerFull = ({ origin, metric, charts }) => {
+  const p = {
+    metric,
+    origin,
+    time: TIME,
+    reduceseconds: 10,
+  }
+  return (
+    <div className="GraphContainer">
+      {charts.map((chart, i) => <GraphFull key={i} {...p} {...chart} />)}
+    </div>
+  )
+}
+
 const DEFAULT_ORIGIN = '000001000013'
 const DEFAULT_METRIC = '001000000000ec'
+
+const SelectHosts = ({ onChange, hosts }) => {
+  return (
+    <div>
+      <select onChange={onChange}>
+        {hosts.map(host => (
+          <option value={host.id} key={host.id}>
+            {host.host}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+const SelectMetrics = ({ onChange, metrics }) => {
+  return (
+    <div>
+      <select onChange={onChange}>
+        {metrics.map(metric => (
+          <option value={metric.id} key={metric.id}>
+            {metric.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
 
 class Items extends React.Component {
   state = {
@@ -84,8 +135,6 @@ class Items extends React.Component {
       origin: DEFAULT_ORIGIN,
       metric: DEFAULT_METRIC,
     },
-    metric: DEFAULT_METRIC,
-    origin: DEFAULT_ORIGIN,
   }
 
   handleChangeInput = type => e => {
@@ -98,59 +147,55 @@ class Items extends React.Component {
     }))
   }
 
-  handleSubmit = e => {
-    e.preventDefault()
-
-    this.setState(prev => ({
-      metric: prev.inputValue.metric,
-      origin: prev.inputValue.origin,
-    }))
-  }
-
   render() {
-    const { inputValue, origin, metric } = this.state
+    const { hosts, metrics } = this.props
+    const {
+      inputValue: { origin, metric },
+    } = this.state
 
     const p = {
       origin,
       metric,
     }
-
     return (
       <div>
-        <form onSubmit={this.handleSubmit}>
-          <div>
-            <input
-              type="text"
-              value={inputValue.origin}
-              onChange={this.handleChangeInput('origin')}
-            />
-          </div>
-          <div>
-            <input
-              type="text"
-              value={inputValue.metric}
-              onChange={this.handleChangeInput('metric')}
-            />
-          </div>
-          <div>
-            <button type="submit">Ok!</button>
-          </div>
-        </form>
+        <div className="selects">
+          <SelectHosts onChange={this.handleChangeInput('origin')} hosts={hosts} />
+        </div>
+        <div className="selects">
+          <SelectMetrics onChange={this.handleChangeInput('metric')} metrics={metrics} />
+        </div>
         <ChartContainer {...p} charts={CHART_1} />
         <ChartContainer {...p} charts={CHART_2} />
         <ChartContainer {...p} charts={CHART_3} />
         <ChartContainer {...p} charts={CHART_4} />
+        <ChartContainerFull {...p} charts={CHART_FULL} />
       </div>
     )
   }
 }
 
 class Main extends React.Component {
+  state = {
+    hosts: [],
+    metrics: [],
+  }
+
+  async componentDidMount() {
+    Promise.all([getHostList(), getMetricsList(DEFAULT_ORIGIN)]).then(([hosts, metrics]) =>
+      this.setState({
+        hosts,
+        metrics,
+      }),
+    )
+  }
+
   render() {
+    const { hosts, metrics } = this.state
     return (
       <div className="main">
         <div className="Items">
-          <Items />
+          <Items hosts={hosts} metrics={metrics} />
         </div>
       </div>
     )

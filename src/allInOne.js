@@ -21,7 +21,7 @@ const margin = {
 const xMax = width - margin.left - margin.right
 const yMax = height - margin.top - margin.bottom
 
-class Graph extends React.Component {
+class GraphFull extends React.Component {
   static defaultProps = {
     domain: {},
     x: d => new Date(d.x),
@@ -40,30 +40,35 @@ class Graph extends React.Component {
     const { origin, metric } = this.props
 
     if (prevProps.origin !== origin || prevProps.metric !== metric) {
-      this.getData(true)
+      this.getData()
     }
   }
 
   async getData() {
     const { reduce, reduceseconds, time, origin, metric } = this.props
 
-    try {
-      const t = time.getTime()
+    const t = time.getTime()
 
-      const data = await getData({
-        metric,
-        origin,
-        reduce,
-        reduceseconds,
-        start: t - 40000,
-        stop: t,
+    Promise.all(
+      reduce.map(n => {
+        const red = reduce[n]
+        return getData({
+          metric,
+          origin,
+          red,
+          reduceseconds,
+          start: t - 40000,
+          stop: t,
+        })
+      }),
+    )
+      .then(data => {
+        console.log(data[0])
+        this.setState({
+          data,
+        })
       })
-      this.setState({
-        data,
-      })
-    } catch (e) {
-      console.log(e.type, e.message)
-    }
+      .catch(e => console.log(e.type, e.message))
   }
 
   render() {
@@ -79,6 +84,8 @@ class Graph extends React.Component {
       domain: domain.y || [0, max(data, y)],
     })
 
+    const [d0, d1] = data
+
     return (
       <div className="Graph">
         <svg width={width} height={height}>
@@ -86,7 +93,7 @@ class Graph extends React.Component {
 
           <Group top={margin.top} left={margin.left}>
             <LinePath
-              data={data}
+              data={d0 || []}
               stroke="url(#gradient)"
               strokeWidth={3}
               x={x}
@@ -95,7 +102,7 @@ class Graph extends React.Component {
               yScale={yScale}
             />
             <LinePath
-              data={data}
+              data={d1 || []}
               stroke="url(#gradient)"
               strokeWidth={3}
               x={x}
@@ -113,4 +120,4 @@ class Graph extends React.Component {
   }
 }
 
-export default Graph
+export default GraphFull
