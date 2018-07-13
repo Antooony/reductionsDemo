@@ -11,58 +11,69 @@ import './index.css'
 const CHART_FULL = [
   {
     title: 'AllInOne',
-    reduce: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+    reduce: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
   },
 ]
 const CHARTS = [
   [
     {
       title: 'classic',
+      i: 0,
     },
     {
       title: 'median',
+      i: 1,
       reduce: 1,
     },
     {
       title: 'average',
+      i: 2,
       reduce: 2,
     },
   ],
   [
     {
       title: 'min',
+      i: 3,
       reduce: 3,
     },
     {
       title: 'max',
+      i: 4,
       reduce: 4,
     },
     {
       title: '1st percentile',
+      i: 5,
       reduce: 5,
     },
   ],
   [
     {
       title: '10th percentile',
+      i: 6,
       reduce: 6,
     },
     {
       title: '90th percentile',
+      i: 7,
       reduce: 7,
     },
     {
       title: '99th percentile',
+      i: 8,
       reduce: 8,
     },
   ],
   [
     {
       title: '25%+75%',
+      i: 9,
       reduce: 9,
     },
     {
       title: 'linear regression',
+      i: 10,
       reduce: 10,
     },
   ],

@@ -3,7 +3,18 @@ import { Group } from '@vx/group'
 import { scaleTime, scaleLinear } from '@vx/scale'
 import { LinePath } from '@vx/shape'
 import { AxisLeft, AxisBottom } from '@vx/axis'
-import { GradientOrangeRed } from '@vx/gradient'
+import {
+  GradientDarkgreenGreen,
+  GradientLightgreenGreen,
+  GradientOrangeRed,
+  GradientPinkBlue,
+  GradientPinkRed,
+  GradientPurpleOrange,
+  GradientPurpleTeal,
+  GradientSteelPurple,
+  GradientTealBlue,
+  LinearGradient,
+} from '@vx/gradient'
 import { extent, max } from 'd3-array'
 
 import getData from './data'
@@ -67,7 +78,7 @@ class Graph extends React.Component {
   }
 
   render() {
-    const { title, x, y, domain } = this.props
+    const { title, x, y, domain, i } = this.props
     const { data } = this.state
 
     const xScale = scaleTime({
@@ -82,12 +93,21 @@ class Graph extends React.Component {
     return (
       <div className="Graph">
         <svg width={width} height={height}>
-          <GradientOrangeRed id="gradient" />
+          <GradientDarkgreenGreen id="gradient-0" />
+          <GradientPurpleTeal id="gradient-1" />
+          <GradientLightgreenGreen id="gradient-2" />
+          <GradientOrangeRed id="gradient-3" />
+          <GradientPinkBlue id="gradient-4" />
+          <GradientPinkRed id="gradient-5" />
+          <GradientPurpleOrange id="gradient-6" />
+          <GradientTealBlue id="gradient-7" />
+          <GradientSteelPurple id="gradient-8" />
+          <LinearGradient from="#a18cd1" to="#fbc2eb" id="gradient-9" />
 
           <Group top={margin.top} left={margin.left}>
             <LinePath
               data={data}
-              stroke="url(#gradient)"
+              stroke={'url(#gradient-' + i + ')'}
               strokeWidth={3}
               x={x}
               xScale={xScale}
