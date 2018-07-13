@@ -184,8 +184,8 @@ class Main extends React.Component {
   async componentDidMount() {
     Promise.all([getHostList(), getMetricsList(DEFAULT_ORIGIN)]).then(([hosts, metrics]) =>
       this.setState({
-        hosts,
-        metrics,
+        hosts: hosts.sort((a, b) => a.host.localeCompare(b.host)),
+        metrics: metrics.sort((a, b) => a.name.localeCompare(b.name)),
       }),
     )
   }

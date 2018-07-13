@@ -3,7 +3,7 @@ import { Group } from '@vx/group'
 import { scaleTime, scaleLinear } from '@vx/scale'
 import { LinePath } from '@vx/shape'
 import { AxisLeft, AxisBottom } from '@vx/axis'
-import { GradientOrangeRed } from '@vx/gradient'
+import { GradientTealBlue, GradientOrangeRed } from '@vx/gradient'
 import { extent, max } from 'd3-array'
 
 import getData from './data'
@@ -50,24 +50,22 @@ class GraphFull extends React.Component {
     const t = time.getTime()
 
     Promise.all(
-      reduce.map(n => {
-        const red = reduce[n]
-        return getData({
+      reduce.map(n =>
+        getData({
           metric,
           origin,
-          red,
+          reduce: n,
           reduceseconds,
           start: t - 40000,
           stop: t,
-        })
-      }),
+        }),
+      ),
     )
-      .then(data => {
-        console.log(data[0])
+      .then(data =>
         this.setState({
           data,
-        })
-      })
+        }),
+      )
       .catch(e => console.log(e.type, e.message))
   }
 
@@ -75,26 +73,28 @@ class GraphFull extends React.Component {
     const { title, x, y, domain } = this.props
     const { data } = this.state
 
+    const [d0, d1] = data
+    const series = data.reduce((r, v) => [...r, ...v], [])
+
     const xScale = scaleTime({
       range: [0, xMax],
-      domain: extent(data, x),
+      domain: extent(series, x),
     })
     const yScale = scaleLinear({
       range: [yMax, 0],
-      domain: domain.y || [0, max(data, y)],
+      domain: domain.y || [0, max(series, y)],
     })
-
-    const [d0, d1] = data
 
     return (
       <div className="Graph">
         <svg width={width} height={height}>
-          <GradientOrangeRed id="gradient" />
+          <GradientOrangeRed id="gradient-0" />
+          <GradientTealBlue id="gradient-1" />
 
           <Group top={margin.top} left={margin.left}>
             <LinePath
               data={d0 || []}
-              stroke="url(#gradient)"
+              stroke="url(#gradient-0)"
               strokeWidth={3}
               x={x}
               xScale={xScale}
@@ -103,7 +103,7 @@ class GraphFull extends React.Component {
             />
             <LinePath
               data={d1 || []}
-              stroke="url(#gradient)"
+              stroke="url(#gradient-1)"
               strokeWidth={3}
               x={x}
               xScale={xScale}
